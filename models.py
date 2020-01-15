@@ -6,6 +6,8 @@ from wtforms.validators import InputRequired, Email, Length, DataRequired, Equal
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 import os
 app = Flask(__name__)
@@ -23,6 +25,27 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
+
+class Question(UserMixin, db.Model):
+    __tablename__ = 'questions'
+    id = db.Column(db.Integer, primary_key=True)
+    modCode = db.Column(db.String(15))
+    question = db.Column(db.String(100))
+    datetime = db.Column(db.Integer)
+    authorId = db.Column(db.Integer)
+    vote = db.Column(db.Integer)
+    description = db.Column(db.String(1000))
+    children = relationship("Answer")
+
+class Answer(UserMixin, db.Model):
+    __tablename__ = 'answers'
+    id = db.Column(db.Integer, primary_key=True)
+    questionId = db.Column(db.Integer, ForeignKey('question.id'))
+    datetime = db.Column(db.Integer)
+    authorId = db.Column(db.Integer)
+    vote = db.Column(db.Integer)
+    answer = db.Column(db.String(1000))
+    parent_id = db.Column(db.Integer, ForeignKey('questions.id'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -46,3 +69,10 @@ class UpdateForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
     retypePassword = PasswordField('Retype Password', validators=[InputRequired(), Length(min=8, max=80)])
+
+class PostQuestionForm(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Sign Up')

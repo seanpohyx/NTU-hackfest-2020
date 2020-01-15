@@ -6,13 +6,13 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from models import User, LoginForm, RegisterForm, UpdateForm, app, db
+from models import User, LoginForm, RegisterForm, UpdateForm, PostQuestionForm, app, db
 from modules import modulesDict
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', title="Index")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -28,7 +28,7 @@ def login():
         return '<h1>Invalid username or password</h1>'
         #return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
 
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, title="login")
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -42,12 +42,27 @@ def signup():
         return redirect(url_for('dashboard'))
         #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
-    return render_template('signup.html', form=form)
+    return render_template('signup.html', form=form, title="signup")
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html', name=current_user.username)
+
+@app.route('/postQuestion', methods=['GET', 'POST'])
+@login_required
+def postQuestion():
+    form = PostQuestionForm()
+
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+        #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
+
+    return render_template('postQuestion.html', form=form, title="post question")
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
