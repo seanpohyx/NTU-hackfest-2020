@@ -10,7 +10,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12).hex()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/seanpoh'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://ravcmlsuuogjpn:e8f5ba9ff258e4170cd8a982ff3ac9981727cd3c9030ba73cb4048d6b67c7622@ec2-174-129-24-148.compute-1.amazonaws.com:5432/dbpis23j1nf4ag'
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -23,7 +23,6 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
-    role = db.Column(db.String(50))
 
 @login_manager.user_loader
 def load_user(user_id):
