@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
@@ -6,7 +6,7 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from models import User, LoginForm, RegisterForm, app, db
+from models import User, LoginForm, RegisterForm, UpdateForm, app, db
 from modules import modulesDict
 
 
@@ -39,8 +39,7 @@ def signup():
         new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-
-        return '<h1>New user has been created!</h1>'
+        return redirect(url_for('dashboard'))
         #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
     return render_template('signup.html', form=form)
@@ -49,6 +48,31 @@ def signup():
 @login_required
 def dashboard():
     return render_template('dashboard.html', name=current_user.username)
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = UpdateForm()
+
+    if form.validate_on_submit():
+        if form.password.data == form.retypePassword.data:
+            hashed_password = generate_password_hash(form.password.data, method='sha256')
+            user = User.query.filter_by(id=current_user.id).first()
+            user.password = hashed_password
+            user.username = form.username.data
+            print(user.username)
+            print(form.username.data)
+            user.email = form.email.data
+            db.session.commit()
+            flash('successful update')
+            return redirect(url_for('dashboard'))
+        else:
+            error('incorrect password')
+
+    form.username.data = current_user.username
+    form.email.data = current_user.email
+
+    return render_template('profile.html', name=current_user.username, form=form)
 
 @app.route('/logout')
 @login_required
