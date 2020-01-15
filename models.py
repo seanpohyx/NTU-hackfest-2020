@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import InputRequired, Email, Length, DataRequired, EqualTo
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -71,6 +71,7 @@ class UpdateForm(FlaskForm):
     retypePassword = PasswordField('Retype Password', validators=[InputRequired(), Length(min=8, max=80)])
 
 class PostQuestionForm(FlaskForm):
-    question = StringField('Question', validators=[InputRequired(), Length(max=50)])
+    question_title = StringField('Title', validators=[InputRequired(), Length(min=4, max=50)])
+    question = TextAreaField('Question', render_kw={"rows": 3}, validators=[InputRequired(), Length(max=50)])
     module_code = StringField('Module Code', validators=[InputRequired(), Length(min=4, max=15)])
     submit = SubmitField('Post Question')
