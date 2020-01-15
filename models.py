@@ -71,8 +71,6 @@ class UpdateForm(FlaskForm):
     retypePassword = PasswordField('Retype Password', validators=[InputRequired(), Length(min=8, max=80)])
 
 class PostQuestionForm(FlaskForm):
-    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
-    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Sign Up')
+    question = StringField('Question', validators=[InputRequired(), Length(max=50)])
+    module_code = StringField('Module Code', validators=[InputRequired(), Length(min=4, max=15)])
+    submit = SubmitField('Post Question')
