@@ -5,35 +5,61 @@ Demo App
 {% endblock %}
 
 {% block content %}
-	
-    <div class="container mt-5">
-    	<form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                
-				<div class="form-group">
-                	  <h3>Ask me a Question</h3>
-					<div class="row mb-3 mt-5" style=" margin-right: 0px; margin-left: 0px;">
-					  <select class="col-2 custom-select mr-5" name="modulesSelect">
-					    <option selected>Module</option>
-				    	{% for key in modules %}
-				    		<option value="{{key}}">{{key}}</option>
-				    	{% endfor %}
-					  </select>
-                    <input name="question" type="text" placeholder="Question" class="col-9 form-control input-lg"/>
-					</div>
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </head>
+	<body>
+        <div class="container mt-5">
+
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <div class="form-group">
+                        <h3>Ask me a Question</h3>
+                        <div class="row mb-3 mt-5" style=" margin-right: 0px; margin-left: 0px;">
+                        <select class="col-2 custom-select mr-5" name="modulesSelect">
+                            <option selected>Module</option>
+                            {% for key in modules %}
+                                <option value="{{key}}">{{key}}</option>
+                            {% endfor %}
+                        </select>
+                        <input name="question" type="text" placeholder="Question" class="col-9 form-control input-lg"/>
+                        </div>
+                    </div>
+                    <!-- <div class="form-group mt-5">
+                        <h3>Ask me a Question</h3>
+                        <input name="question" type="text" id="question" class="form-control input-lg"/>
+                    </div> -->
+                </fieldset>
+
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-lg btn-block btn-outline-info") }}
                 </div>
-                <!-- <div class="form-group mt-5">
-                	<h3>Ask me a Question</h3>
-                    <input name="question" type="text" id="question" class="form-control input-lg"/>
-                </div> -->
+            </form>
 
-			    
-            </fieldset>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-lg btn-block btn-outline-info") }}
-            </div>
-        </form>
+            <input type="text" id = "livebox" placeholder="Module" class="col-9 form-control input-lg"/>
+            <p id = "datalist"> </p>
+        </div><!-- /.container -->
+    </body>
 
-    </div><!-- /.container -->
+        <script>
+            $(document).ready(function(){
+                $("#livebox").on("input",function(e){
+                    searchquery = $("#livebox").val();
+                    $.ajax({
+                        method:'POST',
+                        url: '/livesearch',
+                        data:{text:searchquery},
+                        success:function(res){
+                            if(searchquery.length > 0)
+                                $("#datalist").html(res + "<br>");
+                            else
+                                $('#datalist').html(" ");
+                        }
+                    })
+                });
+            })
+        </script>
+
 {% endblock %}
