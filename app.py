@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from models import User, LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, Question, Answer, app, db
 from modules import modulesDict
-import time
+from datetime import datetime
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -74,7 +74,7 @@ def dashboard():
 def postQuestion():
     form = PostQuestionForm()
     if form.validate_on_submit():
-        new_question = Question(modCode=form.module_code.data, question=form.question_title.data, datetime=time.time(), 
+        new_question = Question(modCode=form.module_code.data, question=form.question_title.data, datetime=datetime.now(), 
                                 authorId=current_user.get_id(), vote=0, description=form.question.data)
         db.session.add(new_question)
         db.session.commit()
@@ -89,17 +89,13 @@ def postQuestion():
 @app.route('/your_questions')
 @login_required
 def your_questions():
-    questions = Question.query.all()
-    for q in questions:
-        q.datetime = time.strftime("%d-%b-%Y %H:%M", time.localtime(q.datetime))
+    questions = Question.query.filter_by(authorId=current_user.get_id())
     return render_template('your_questions.html', name=current_user.username, questions = questions)
 
 @app.route('/question/<int:question_id>')
 def question(question_id):
     question = Question.query.get_or_404(question_id)
-
-    return render_template('question.html', title=question.question, question = question, 
-        datetime = time.strftime("%d-%b-%Y %H:%M", time.localtime(question.datetime)))
+    return render_template('question.html', title=question.question, question = question)
 
 @app.route('/question/<int:question_id>/update', methods=['GET', 'POST'])
 @login_required

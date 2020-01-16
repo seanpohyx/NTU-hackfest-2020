@@ -6,7 +6,7 @@
         <div class="media-body">
             <div class="article-metadata">
                 <a class="mr-2" href="#">{{ question.author.username }}</a>
-                <small class="text-muted">{{ datetime }}</small>
+                <small class="text-muted">{{ question.datetime.strftime('%d-%b-%Y %H:%M') }}</small>
                 {% if question.author == current_user %}
                       <div>
                         <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_question', question_id=question.id) }}">Update</a>
