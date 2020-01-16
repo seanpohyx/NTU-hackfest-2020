@@ -83,7 +83,7 @@ class PostQuestionForm(FlaskForm):
     question_title = StringField('Title', validators=[InputRequired(), Length(min=4, max=50)])
     question = TextAreaField('Question', render_kw={"rows": 3}, validators=[InputRequired(), Length(max=50)])
     module_code = StringField('Module Code', validators=[InputRequired(), Length(min=4, max=15)])
-    submit = SubmitField('Post Question')
+    submit = SubmitField('Submit')
 
 class SearchForm(FlaskForm):
     submit = SubmitField('Search')
