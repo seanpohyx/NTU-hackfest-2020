@@ -26,7 +26,7 @@ Demo App
                         </select>
                         <!-- <input name="question" type="text" placeholder="Question" class="col-9 form-control input-lg"/> -->
 	                        <input type="text" name="question" id ="livebox" placeholder="Module" class="col-9 form-control input-lg"/>
-	            			<p id = "datalist"> </p>
+	            			<div id = "datalist" class="col-9"> </div>
                         </div>
                     </div>
                     <!-- <div class="form-group mt-5">
@@ -43,22 +43,33 @@ Demo App
     </body>
 
         <script>
-            $(document).ready(function(){
-                $("#livebox").on("input",function(e){
-                    searchquery = $("#livebox").val();
-                    $.ajax({
-                        method:'POST',
-                        url: '/livesearch',
-                        data:{text:searchquery},
-                        success:function(res){
-                            if(searchquery.length > 0)
-                                $("#datalist").html(res + "<br>");
-                            else
-                                $('#datalist').html(" ");
-                        }
-                    })
-                });
-            })
+        	$(document).ready(function(){
+        		$("#livebox").on("input",function(e){
+        			searchquery = $("#livebox").val();
+        			$.ajax({
+        				method:'POST',
+        				url: '/livesearch',
+        				data:{text:searchquery},
+        				success:function(res){
+        					if(searchquery.length > 0){
+        						var msg = "";
+        						for(i in res){
+        							msg += "<div onclick='onClickLoadTB(\""+res[i]+"\")' class='customHint col-9'>"+res[i]+"</div>"
+        						}
+        						$("#datalist").html(msg);
+        					}
+        					else
+        						$('#datalist').html(" ");
+        				}
+        			})
+        		});
+        	})
+
+        	function onClickLoadTB(msg){
+        		$("#livebox").val(msg);
+        		$('#datalist').html("");
+
+        	}
         </script>
 
 {% endblock %}
