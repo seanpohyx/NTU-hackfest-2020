@@ -6,12 +6,13 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from models import User, LoginForm, RegisterForm, UpdateForm, PostQuestionForm, searchForm, app, db
+from models import User, LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, Question, Answer, app, db
 from modules import modulesDict
+import time
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    form = searchForm()
+    form = SearchForm()
 
     if form.validate_on_submit():
         question = request.form.get('question')
@@ -60,11 +61,10 @@ def dashboard():
 @login_required
 def postQuestion():
     form = PostQuestionForm()
-
     if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-        db.session.add(new_user)
+        new_question = Question(modCode=form.module_code.data, question=form.question_title.data, datetime=time.time(), 
+                                authorId=current_user.get_id(), vote=0, description=form.question.data)
+        db.session.add(new_question)
         db.session.commit()
         return redirect(url_for('dashboard'))
         #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
