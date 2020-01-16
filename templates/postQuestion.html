@@ -4,7 +4,7 @@
         <form method="POST" action="" class="mx-auto">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Ask a Question</legend>
+                <legend class="border-bottom mb-4">{{ legend }}</legend>
                 <div class="form-group">
                     {{ form.question_title.label(class="form-control-label") }}
                     {% if form.question_title.errors %}

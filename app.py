@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, abort
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
@@ -71,7 +71,8 @@ def postQuestion():
         return redirect(url_for('your_questions'))
         #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
-    return render_template('postQuestion.html', form=form, title="New Question")
+    return render_template('postQuestion.html', form=form, 
+                            title="New Question", legend="New Question")
 
 @app.route('/your_questions')
 @login_required
@@ -81,11 +82,47 @@ def your_questions():
         q.datetime = time.strftime("%d-%b-%Y %H:%M", time.localtime(q.datetime))
     return render_template('your_questions.html', name=current_user.username, questions = questions)
 
-@app.route('/your_questions/<int:question_id>')
-@login_required
+@app.route('/question/<int:question_id>')
 def question(question_id):
     question = Question.query.get_or_404(question_id)
-    return render_template('question.html', title=question.question, question = question)
+
+    return render_template('question.html', title=question.question, question = question, 
+        datetime = time.strftime("%d-%b-%Y %H:%M", time.localtime(question.datetime)))
+
+@app.route('/question/<int:question_id>/update', methods=['GET', 'POST'])
+@login_required
+def update_question(question_id):
+    question = Question.query.get_or_404(question_id)
+    if question.author != current_user:
+        abort(403)
+    form = PostQuestionForm()
+
+    if form.validate_on_submit():
+        question.question = form.question_title.data
+        question.description = form.question.data
+        question.modCode = form.module_code.data
+        db.session.commit()
+        flash('Your question has been updated!', 'success')
+        return redirect(url_for('question', question_id=question.id))
+
+    elif request.method == 'GET':
+        form.question_title.data = question.question
+        form.question.data = question.description
+        form.module_code.data = question.modCode
+
+    return render_template('postQuestion.html', form=form, 
+                            title="Update Question", legend="Update Question")
+
+@app.route('/question/<int:question_id>/delete', methods=['POST'])
+@login_required
+def delete_question(question_id):
+    question = Question.query.get_or_404(question_id)
+    if question.author != current_user:
+        abort(403)
+    db.session.delete(question)
+    db.session.commit()
+    flash('Your question has been deleted!', 'success')
+    return redirect(url_for('your_questions'))
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
