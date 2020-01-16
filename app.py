@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
@@ -21,6 +21,17 @@ def index():
         print(str(modules))
 
     return render_template('index.html', title="Index", form=form, modules=modulesDict)
+
+@app.route("/livesearch", methods=['GET', 'POST'])
+def livesearch():
+    hint = list()
+    search = "%{}%".format(request.form.get("text"))
+    result = Question.query.filter(Question.modCode.like(search)).all()
+
+    for i in result:
+        hint.append(i.modCode)
+    
+    return jsonify(hint)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
