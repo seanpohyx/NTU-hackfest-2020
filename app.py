@@ -27,10 +27,11 @@ def index():
 def livesearch():
     hint = list()
     search = "%{}%".format(request.form.get("text"))
-    result = Question.query.filter(Question.modCode.like(search)).all()
+    print(search)
+    result = Question.query.filter(Question.question.like(search)).all()
 
     for i in result:
-        hint.append(i.modCode)
+        hint.append(i.question)
     
     return jsonify(hint)
 
