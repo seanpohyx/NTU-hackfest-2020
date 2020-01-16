@@ -8,8 +8,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
-
+import time
 import os
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12).hex()
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://ravcmlsuuogjpn:e8f5ba9ff258e4170cd8a982ff3ac9981727cd3c9030ba73cb4048d6b67c7622@ec2-174-129-24-148.compute-1.amazonaws.com:5432/dbpis23j1nf4ag'
@@ -25,17 +26,25 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
+    image_file = db.column(db.String(20))
+    questions = db.relationship('Question', backref='author', lazy=True)
+
+    def __repr__(self):
+        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
+
 
 class Question(UserMixin, db.Model):
     __tablename__ = 'questions'
     id = db.Column(db.Integer, primary_key=True)
-    modCode = db.Column(db.String(15))
-    question = db.Column(db.String(100))
+    modCode = db.Column(db.String(15), nullable=False)
+    question = db.Column(db.String(100), nullable=False)
     datetime = db.Column(db.Integer)
-    authorId = db.Column(db.Integer)
+    authorId = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     vote = db.Column(db.Integer)
-    description = db.Column(db.String(1000))
-    children = relationship("Answer")
+    description = db.Column(db.String(1000), nullable=False)
+
+    def __repr__(self):
+        return f"Question('{self.question}')"
 
 class Answer(UserMixin, db.Model):
     __tablename__ = 'answers'

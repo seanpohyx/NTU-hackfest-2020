@@ -77,10 +77,26 @@ def postQuestion():
                                 authorId=current_user.get_id(), vote=0, description=form.question.data)
         db.session.add(new_question)
         db.session.commit()
-        return redirect(url_for('dashboard'))
+
+        flash('Your question has been created!', 'success')
+        return redirect(url_for('your_questions'))
         #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
-    return render_template('postQuestion.html', form=form, title="post question")
+    return render_template('postQuestion.html', form=form, title="New Question")
+
+@app.route('/your_questions')
+@login_required
+def your_questions():
+    questions = Question.query.all()
+    for q in questions:
+        q.datetime = time.strftime("%d-%b-%Y %H:%M", time.localtime(q.datetime))
+    return render_template('your_questions.html', name=current_user.username, questions = questions)
+
+@app.route('/your_questions/<int:question_id>')
+@login_required
+def question(question_id):
+    question = Question.query.get_or_404(question_id)
+    return render_template('question.html', title=question.question, question = question)
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required

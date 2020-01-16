@@ -1,0 +1,17 @@
+{% extends "indexLayout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    {% for question in questions %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="#">{{ question.author.username }}</a>
+                    <small class="text-muted">{{ question.datetime }}</small>
+                </div>
+                <h2><a class = "article-title" href="{{ url_for('question', question_id=question.id) }}">{{question.question}}</a></h2>
+                <p class="article-content">{{question.description}}</p>
+            </div>
+        </article>
+    {% endfor %}
+{% endblock %}
