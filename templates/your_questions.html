@@ -7,7 +7,7 @@
             <div class="media-body">
                 <div class="article-metadata">
                     <a class="mr-2" href="#">{{ question.author.username }}</a>
-                    <small class="text-muted">{{ question.datetime }}</small>
+                    <small class="text-muted">{{ question.datetime.strftime('%d-%b-%Y %H:%M')}}</small>
                 </div>
                 <h2><a class = "article-title" href="{{ url_for('question', question_id=question.id) }}">{{question.question}}</a></h2>
                 <p class="article-content">{{question.description}}</p>

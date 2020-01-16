@@ -38,7 +38,7 @@ class Question(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     modCode = db.Column(db.String(15), nullable=False)
     question = db.Column(db.String(100), nullable=False)
-    datetime = db.Column(db.Integer)
+    datetime = db.Column(db.DateTime, nullable=False)
     authorId = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     vote = db.Column(db.Integer)
     description = db.Column(db.String(1000), nullable=False)
@@ -50,7 +50,7 @@ class Answer(UserMixin, db.Model):
     __tablename__ = 'answers'
     id = db.Column(db.Integer, primary_key=True)
     questionId = db.Column(db.Integer, ForeignKey('question.id'))
-    datetime = db.Column(db.Integer)
+    datetime = db.Column(db.DateTime, nullable=False)
     authorId = db.Column(db.Integer)
     vote = db.Column(db.Integer)
     answer = db.Column(db.String(1000))
