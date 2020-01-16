@@ -74,3 +74,7 @@ class PostQuestionForm(FlaskForm):
     question = StringField('Question', validators=[InputRequired(), Length(max=50)])
     module_code = StringField('Module Code', validators=[InputRequired(), Length(min=4, max=15)])
     submit = SubmitField('Post Question')
+
+class searchForm(FlaskForm):
+    submit = SubmitField('Search')
+
