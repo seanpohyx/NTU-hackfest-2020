@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
@@ -6,14 +6,21 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from models import User, LoginForm, RegisterForm, UpdateForm, PostQuestionForm, Question, Answer, app, db
+from models import User, LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, Question, Answer, app, db
 from modules import modulesDict
 import time
 
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', title="Index")
+    form = SearchForm()
+
+    if form.validate_on_submit():
+        question = request.form.get('question')
+        modules = request.form.get('modulesSelect')
+        print(question)
+        print(str(modules))
+
+    return render_template('index.html', title="Index", form=form, modules=modulesDict)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
