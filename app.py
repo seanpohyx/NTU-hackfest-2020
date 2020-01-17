@@ -49,7 +49,7 @@ def livesearch():
     hint = list()
     search = "%{}%".format(request.form.get("text"))
     module = request.form.get("module")
-    result = Question.query.filter_by(modCode=module).filter(Question.question.like(search)).all()
+    result = Question.query.filter_by(modCode=module).filter(Question.question.ilike(search)).all()
 
     for i in result:
         hint.append(i.question)
@@ -62,7 +62,7 @@ def searchResults(module, question):
     question = request.args.get('question', question)
     module = request.args.get('module', module)
     search = "%{}%".format(question)
-    results = Question.query.filter_by(modCode=module).filter(Question.question.like(search)).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
+    results = Question.query.filter_by(modCode=module).filter(Question.question.ilike(search)).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
     if results.items == []:
         flash("There are no results currently.", "success")
     return render_template('search_results.html', questions = results, search=question, module=module.upper())
@@ -78,8 +78,7 @@ def login():
                 login_user(user, remember=form.remember.data)
                 return redirect(url_for('dashboard'))
 
-        return '<h1>Invalid username or password</h1>'
-        #return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
+        flash('Invalid username or password')
 
     return render_template('login.html', form=form, title="login")
 
@@ -93,7 +92,6 @@ def signup():
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('dashboard'))
-        #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
     return render_template('signup.html', form=form, title="signup")
 
@@ -114,7 +112,6 @@ def postQuestion():
 
         flash('Your question has been created!', 'success')
         return redirect(url_for('your_questions'))
-        #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
     return render_template('postQuestion.html', form=form, legend="New Question")
 
