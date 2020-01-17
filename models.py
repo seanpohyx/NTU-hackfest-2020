@@ -30,7 +30,7 @@ class User(UserMixin, db.Model):
     questions = db.relationship('Question', backref='author', lazy=True)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
+        return f"User('{self.id}','{self.username}', '{self.email}', '{self.image_file}')"
 
 
 class Question(UserMixin, db.Model):
@@ -40,21 +40,23 @@ class Question(UserMixin, db.Model):
     question = db.Column(db.String(100), nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
     authorId = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    authorName = db.Column(db.String(15), nullable=False)
     vote = db.Column(db.Integer)
     description = db.Column(db.String(1000), nullable=False)
+    answers = db.relationship('Answer', backref='answer_author', lazy=True)
 
     def __repr__(self):
-        return f"Question('{self.question}')"
+        return f"Question('{self.question}, {self.id}, {self.authorId}, {self.authorName}')"
 
 class Answer(UserMixin, db.Model):
     __tablename__ = 'answers'
     id = db.Column(db.Integer, primary_key=True)
-    questionId = db.Column(db.Integer, ForeignKey('question.id'))
+    questionId = db.Column(db.Integer, ForeignKey('questions.id'))
     datetime = db.Column(db.DateTime, nullable=False)
     authorId = db.Column(db.Integer)
+    authorName = db.Column(db.String(15), nullable=False)
     vote = db.Column(db.Integer)
     answer = db.Column(db.String(1000))
-    parent_id = db.Column(db.Integer, ForeignKey('questions.id'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -87,4 +89,8 @@ class PostQuestionForm(FlaskForm):
 
 class SearchForm(FlaskForm):
     submit = SubmitField('Search')
+
+class AnswerForm(FlaskForm):
+    answer = TextAreaField(render_kw={"rows": 3}, validators=[InputRequired(),Length(max=1000)])
+    submit = SubmitField('Submit')
 

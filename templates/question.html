@@ -18,6 +18,45 @@
             <p class="article-content">{{question.description}}</p>
         </div>
     </article>
+    
+    {% for answer in answers %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="{{ url_for('user_questions', username=answer.authorName)}}">{{ answer.authorName }}</a>
+                    <small class="text-muted">{{ answer.datetime.strftime('%d-%b-%Y %H:%M')}}</small>
+                </div>
+                <p class="article-content">{{answer.answer}}</p>
+            </div>
+        </article>
+    {% endfor %}
+    {% if current_user.is_authenticated %}
+    <article class="media content-section">
+        <div class="media-body">
+          <form method="POST" action="" class="mx-auto">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Know the answer?</legend>
+                <div class="form-group">
+                    {% if form.answer.errors %}
+                        {{ form.answer(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.answer.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.answer(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group text-center">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+          </form>
+        </div>
+    </article>
+    {% endif %}
     <!-- Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">

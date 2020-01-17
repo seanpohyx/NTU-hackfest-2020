@@ -6,7 +6,7 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from models import User, LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, Question, Answer, app, db
+from models import User, LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, AnswerForm, Question, Answer, app, db
 from modules import modulesDict
 from datetime import datetime
 
@@ -72,7 +72,7 @@ def postQuestion():
     form = PostQuestionForm()
     if form.validate_on_submit():
         new_question = Question(modCode=form.module_code.data, question=form.question_title.data, datetime=datetime.now(), 
-                                authorId=current_user.get_id(), vote=0, description=form.question.data)
+                                authorName= current_user.username, authorId=current_user.get_id(), vote=0, description=form.question.data)
         db.session.add(new_question)
         db.session.commit()
 
@@ -80,7 +80,7 @@ def postQuestion():
         return redirect(url_for('your_questions'))
         #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
-    return render_template('postQuestion.html', form=form, title="New Question")
+    return render_template('postQuestion.html', form=form, legend="New Question")
 
 @app.route('/your_questions')
 @login_required
@@ -89,17 +89,55 @@ def your_questions():
     questions = Question.query.filter_by(authorId=current_user.get_id()).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
     return render_template('your_questions.html', name=current_user.username, questions = questions)
 
-
-@app.route('/question/<int:question_id>')
+@app.route('/question/<int:question_id>', methods=['GET', 'POST'])
 def question(question_id):
+    form = AnswerForm()
     question = Question.query.get_or_404(question_id)
-    return render_template('question.html', title=question.question, question = question)
+    answers = Answer.query.filter_by(questionId=question_id)
+
+    if form.validate_on_submit():
+        new_answer = Answer(questionId=question_id, datetime=datetime.now(), authorId=question.author.id, vote=0, answer=form.answer.data,
+                        authorName=current_user.username)
+        db.session.add(new_answer)
+        db.session.commit()
+        flash('Your answer has been submitted!', 'success')
+        return redirect(url_for('question', question_id=question_id))
+    return render_template('question.html', form=form, title=question.question, question=question, answers=answers)
 
 @app.route('/question/<int:question_id>/update', methods=['GET', 'POST'])
 @login_required
 def update_question(question_id):
     question = Question.query.get_or_404(question_id)
-    return render_template('question.html', title=question.question, question = question)
+    if question.author != current_user:
+        abort(403)
+    form = PostQuestionForm()
+
+    if form.validate_on_submit():
+        question.question = form.question_title.data
+        question.description = form.question.data
+        question.modCode = form.module_code.data
+        db.session.commit()
+        flash('Your question has been updated!', 'success')
+        return redirect(url_for('question', question_id=question.id))
+
+    elif request.method == 'GET':
+        form.question_title.data = question.question
+        form.question.data = question.description
+        form.module_code.data = question.modCode
+
+    return render_template('postQuestion.html', form=form, 
+                            title="Update Question", legend="Update Question")
+
+@app.route('/question/<int:question_id>/delete', methods=['POST'])
+@login_required
+def delete_question(question_id):
+    question = Question.query.get_or_404(question_id)
+    if question.author != current_user:
+        abort(403)
+    db.session.delete(question)
+    db.session.commit()
+    flash('Your question has been deleted!', 'success')
+    return redirect(url_for('your_questions'))
 
 @app.route('/user/<string:username>')
 @login_required
