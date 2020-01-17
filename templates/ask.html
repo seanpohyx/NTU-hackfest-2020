@@ -1,0 +1,69 @@
+{% extends "indexLayout.html" %}
+
+{% block title %}
+Demo App
+{% endblock %}
+
+{% block content %}
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </head>
+	<body>
+        <div class="container mt-5">
+
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <div class="form-group">
+                        <h3>Ask me a Question</h3>
+                        <input type="text" name="question" id ="livebox" placeholder="Question" class="form-control input-lg"/>
+                        <div id = "datalist"> </div>
+                    </div>
+                    <!-- <div class="form-group mt-5">
+                        <h3>Ask me a Question</h3>
+                        <input name="question" type="text" id="question" class="form-control input-lg"/>
+                    </div> -->
+                </fieldset>
+
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-lg btn-block btn-outline-info") }}
+                </div>
+            </form>
+        </div><!-- /.container -->
+    </body>
+
+    <script>
+    	$(document).ready(function(){
+    		$("#livebox").on("input",function(e){
+    			searchquery = $("#livebox").val();
+    			$.ajax({
+    				method:'POST',
+    				url: '/livesearch',
+    				data:{
+                        text:searchquery,
+                        module: '{{module}}'
+                    },
+    				success:function(res){
+    					if(searchquery.length > 0){
+    						var msg = "";
+    						for(i in res){
+    							msg += "<div onclick='onClickLoadTB(\""+res[i]+"\")' class='dropdown-item'>"+res[i]+"</div>"
+    						}
+    						$("#datalist").html(msg);
+    					}
+    					else
+    						$('#datalist').html(" ");
+    				}
+    			})
+    		});
+    	})
+
+    	function onClickLoadTB(msg){
+    		$("#livebox").val(msg);
+    		$('#datalist').html("");
+
+    	}
+    </script>
+
+{% endblock %}

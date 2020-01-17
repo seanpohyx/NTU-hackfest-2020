@@ -86,5 +86,5 @@ class PostQuestionForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class SearchForm(FlaskForm):
-    submit = SubmitField('Search')
+    submit = SubmitField('Next')
 

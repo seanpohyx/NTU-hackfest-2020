@@ -15,21 +15,45 @@ def index():
     form = SearchForm()
 
     if form.validate_on_submit():
-        question = request.form.get('question')
-        modules = request.form.get('modulesSelect')
+        module = request.form.get('modulesSelect').upper()
+
+        if ((module in modulesDict) is False):
+            flash("please enter the right module", "error")
+        elif module is "":
+            flash("please choose your module", "error")
+        else:
+            return redirect(url_for('ask', module=module))
 
     return render_template('index.html', title="Index", form=form, modules=modulesDict)
+
+@app.route('/ask/<string:module>', methods=['GET', 'POST'])
+def ask(module):
+
+    if ((module.upper() in modulesDict) is False):
+            return redirect(url_for('index'))
+            #incorrect module
+
+    form = SearchForm()
+
+    if form.validate_on_submit():
+        question = request.form.get('question')
+        print(question)
+
+    return render_template('ask.html', title="Index", form=form, module=module.upper())
 
 @app.route("/livesearch", methods=['GET', 'POST'])
 def livesearch():
     hint = list()
     search = "%{}%".format(request.form.get("text"))
-    result = Question.query.filter(Question.question.like(search)).all()
+    module = request.form.get("module")
+    result = Question.query.filter_by(modCode=module).filter(Question.question.like(search)).all()
 
     for i in result:
         hint.append(i.question)
     
     return jsonify(hint)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
