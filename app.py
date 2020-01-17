@@ -109,7 +109,8 @@ def postQuestion():
 @app.route('/your_questions')
 @login_required
 def your_questions():
-    questions = Question.query.filter_by(authorId=current_user.get_id())
+    page = request.args.get('page', 1, type=int)
+    questions = Question.query.filter_by(authorId=current_user.get_id()).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
     return render_template('your_questions.html', name=current_user.username, questions = questions)
 
 
@@ -123,6 +124,17 @@ def question(question_id):
 def update_question(question_id):
     question = Question.query.get_or_404(question_id)
     return render_template('question.html', title=question.question, question = question)
+
+@app.route('/user/<string:username>')
+@login_required
+def user_questions(username):
+    page = request.args.get('page', 1, type=int)
+    user = User.query.filter_by(username=username).first_or_404()
+    questions = Question.query.filter_by(author=user)\
+                .order_by(Question.datetime.desc())\
+                .paginate(page=page, per_page=5)
+    return render_template('user_questions.html', user=user, questions = questions)
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
