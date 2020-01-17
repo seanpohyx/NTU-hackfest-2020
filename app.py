@@ -105,7 +105,8 @@ def dashboard():
 def postQuestion():
     form = PostQuestionForm()
     if form.validate_on_submit():
-        new_question = Question(modCode=form.module_code.data, question=form.question_title.data, datetime=datetime.now(), 
+        module = request.form.get('modulesSelect').upper()
+        new_question = Question(modCode=module, question=form.question_title.data, datetime=datetime.now(), 
                                 authorName= current_user.username, authorId=current_user.get_id(), vote=0, description=form.question.data)
         db.session.add(new_question)
         db.session.commit()
@@ -113,7 +114,7 @@ def postQuestion():
         flash('Your question has been created!', 'success')
         return redirect(url_for('your_questions'))
 
-    return render_template('postQuestion.html', form=form, legend="New Question")
+    return render_template('postQuestion.html', form=form, legend="New Question", modules=modulesDict)
 
 @app.route('/your_questions')
 @login_required
