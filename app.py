@@ -1,5 +1,4 @@
-
-from flask import Flask, render_template, redirect, url_for, flash, request, abort, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
@@ -18,8 +17,6 @@ def index():
     if form.validate_on_submit():
         question = request.form.get('question')
         modules = request.form.get('modulesSelect')
-        print(question)
-        print(str(modules))
 
     return render_template('index.html', title="Index", form=form, modules=modulesDict)
 
@@ -27,7 +24,6 @@ def index():
 def livesearch():
     hint = list()
     search = "%{}%".format(request.form.get("text"))
-    print(search)
     result = Question.query.filter(Question.question.like(search)).all()
 
     for i in result:
@@ -84,8 +80,7 @@ def postQuestion():
         return redirect(url_for('your_questions'))
         #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
-    return render_template('postQuestion.html', form=form, 
-                            title="New Question", legend="New Question")
+    return render_template('postQuestion.html', form=form, title="New Question")
 
 @app.route('/your_questions')
 @login_required
@@ -93,6 +88,7 @@ def your_questions():
     page = request.args.get('page', 1, type=int)
     questions = Question.query.filter_by(authorId=current_user.get_id()).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
     return render_template('your_questions.html', name=current_user.username, questions = questions)
+
 
 @app.route('/question/<int:question_id>')
 def question(question_id):
@@ -103,36 +99,7 @@ def question(question_id):
 @login_required
 def update_question(question_id):
     question = Question.query.get_or_404(question_id)
-    if question.author != current_user:
-        abort(403)
-    form = PostQuestionForm()
-
-    if form.validate_on_submit():
-        question.question = form.question_title.data
-        question.description = form.question.data
-        question.modCode = form.module_code.data
-        db.session.commit()
-        flash('Your question has been updated!', 'success')
-        return redirect(url_for('question', question_id=question.id))
-
-    elif request.method == 'GET':
-        form.question_title.data = question.question
-        form.question.data = question.description
-        form.module_code.data = question.modCode
-
-    return render_template('postQuestion.html', form=form, 
-                            title="Update Question", legend="Update Question")
-
-@app.route('/question/<int:question_id>/delete', methods=['POST'])
-@login_required
-def delete_question(question_id):
-    question = Question.query.get_or_404(question_id)
-    if question.author != current_user:
-        abort(403)
-    db.session.delete(question)
-    db.session.commit()
-    flash('Your question has been deleted!', 'success')
-    return redirect(url_for('your_questions'))
+    return render_template('question.html', title=question.question, question = question)
 
 @app.route('/user/<string:username>')
 @login_required
