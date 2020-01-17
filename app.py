@@ -18,21 +18,45 @@ def index():
     form = SearchForm()
 
     if form.validate_on_submit():
-        question = request.form.get('question')
-        modules = request.form.get('modulesSelect')
+        module = request.form.get('modulesSelect').upper()
+
+        if ((module in modulesDict) is False):
+            flash("please enter the right module", "error")
+        elif module is "":
+            flash("please choose your module", "error")
+        else:
+            return redirect(url_for('ask', module=module))
 
     return render_template('index.html', title="Index", form=form, modules=modulesDict)
+
+@app.route('/ask/<string:module>', methods=['GET', 'POST'])
+def ask(module):
+
+    if ((module.upper() in modulesDict) is False):
+            return redirect(url_for('index'))
+            #incorrect module
+
+    form = SearchForm()
+
+    if form.validate_on_submit():
+        question = request.form.get('question')
+        print(question)
+
+    return render_template('ask.html', title="Index", form=form, module=module.upper())
 
 @app.route("/livesearch", methods=['GET', 'POST'])
 def livesearch():
     hint = list()
     search = "%{}%".format(request.form.get("text"))
-    result = Question.query.filter(Question.question.like(search)).all()
+    module = request.form.get("module")
+    result = Question.query.filter_by(modCode=module).filter(Question.question.like(search)).all()
 
     for i in result:
         hint.append(i.question)
     
     return jsonify(hint)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -88,7 +112,8 @@ def postQuestion():
 @app.route('/your_questions')
 @login_required
 def your_questions():
-    questions = Question.query.filter_by(authorId=current_user.get_id())
+    page = request.args.get('page', 1, type=int)
+    questions = Question.query.filter_by(authorId=current_user.get_id()).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
     return render_template('your_questions.html', name=current_user.username, questions = questions)
 
 
@@ -112,6 +137,16 @@ def save_picture(form_picture):
     i.save(picture_path)
 
     return picture_fn
+@app.route('/user/<string:username>')
+@login_required
+def user_questions(username):
+    page = request.args.get('page', 1, type=int)
+    user = User.query.filter_by(username=username).first_or_404()
+    questions = Question.query.filter_by(author=user)\
+                .order_by(Question.datetime.desc())\
+                .paginate(page=page, per_page=5)
+    return render_template('user_questions.html', user=user, questions = questions)
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required

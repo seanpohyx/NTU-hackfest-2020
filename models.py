@@ -83,11 +83,11 @@ class UpdateForm(FlaskForm):
     submit = SubmitField('Submit')
     
 class PostQuestionForm(FlaskForm):
-    question_title = StringField('Title', validators=[InputRequired(), Length(min=4, max=50)])
-    question = TextAreaField('Question', render_kw={"rows": 3}, validators=[InputRequired(), Length(max=50)])
+    question_title = StringField('Title', validators=[InputRequired(), Length(min=4, max=100)])
+    question = TextAreaField('Question', render_kw={"rows": 3}, validators=[InputRequired(), Length(max=1000)])
     module_code = StringField('Module Code', validators=[InputRequired(), Length(min=4, max=15)])
     submit = SubmitField('Submit')
 
 class SearchForm(FlaskForm):
-    submit = SubmitField('Search')
+    submit = SubmitField('Next')
 

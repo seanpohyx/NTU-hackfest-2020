@@ -16,23 +16,22 @@ Demo App
                 {{ form.hidden_tag() }}
                 <fieldset class="form-group">
                     <div class="form-group">
-                        <h3>Ask me a Question</h3>
-                        <div class="row mb-3 mt-5" style=" margin-right: 0px; margin-left: 0px;">
-                        <select class="col-2 custom-select mr-5" name="modulesSelect">
-                            <option selected>Module</option>
-                            {% for key in modules %}
-                                <option value="{{key}}">{{key}}</option>
-                            {% endfor %}
-                        </select>
-                        <!-- <input name="question" type="text" placeholder="Question" class="col-9 form-control input-lg"/> -->
-	                        <input type="text" name="question" id ="livebox" placeholder="Module" class="col-9 form-control input-lg"/>
-	            			<div id = "datalist" class="col-9"> </div>
+                        <h3>Choose the mod that you wish to consult</h3>
+                        <div class="mb-3 mt-5">
+                        	<input class="custom-select mr-5" type="text" placeholder="modules" name="modulesSelect" list="modules-list">
+                        	<datalist id="modules-list">
+	                            {% for key in modules %}
+	                                <option value="{{key}}">{{modules[key]}}</option>
+	                            {% endfor %}
+							</datalist>
+	                        <!-- <select class="custom-select mr-5" name="modulesSelect">
+	                            <option selected>Module</option>
+	                            {% for key in modules %}
+	                                <option value="{{key}}">{{key}}</option>
+	                            {% endfor %}
+	                        </select> -->
                         </div>
                     </div>
-                    <!-- <div class="form-group mt-5">
-                        <h3>Ask me a Question</h3>
-                        <input name="question" type="text" id="question" class="form-control input-lg"/>
-                    </div> -->
                 </fieldset>
 
                 <div class="form-group">
@@ -41,35 +40,5 @@ Demo App
             </form>
         </div><!-- /.container -->
     </body>
-
-        <script>
-        	$(document).ready(function(){
-        		$("#livebox").on("input",function(e){
-        			searchquery = $("#livebox").val();
-        			$.ajax({
-        				method:'POST',
-        				url: '/livesearch',
-        				data:{text:searchquery},
-        				success:function(res){
-        					if(searchquery.length > 0){
-        						var msg = "";
-        						for(i in res){
-        							msg += "<div onclick='onClickLoadTB(\""+res[i]+"\")' class='customHint col-9'>"+res[i]+"</div>"
-        						}
-        						$("#datalist").html(msg);
-        					}
-        					else
-        						$('#datalist').html(" ");
-        				}
-        			})
-        		});
-        	})
-
-        	function onClickLoadTB(msg){
-        		$("#livebox").val(msg);
-        		$('#datalist').html("");
-
-        	}
-        </script>
 
 {% endblock %}
