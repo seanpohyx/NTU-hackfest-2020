@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import InputRequired, Email, Length, DataRequired, EqualTo
 from flask_sqlalchemy  import SQLAlchemy
@@ -26,7 +27,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
-    image_file = db.column(db.String(20))
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     questions = db.relationship('Question', backref='author', lazy=True)
 
     def __repr__(self):
@@ -78,7 +79,9 @@ class UpdateForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
     retypePassword = PasswordField('Retype Password', validators=[InputRequired(), Length(min=8, max=80)])
-
+    image = FileField('Update Profile Picture', validators=[FileAllowed(['png','jpg','jpeg'])])
+    submit = SubmitField('Submit')
+    
 class PostQuestionForm(FlaskForm):
     question_title = StringField('Title', validators=[InputRequired(), Length(min=4, max=50)])
     question = TextAreaField('Question', render_kw={"rows": 3}, validators=[InputRequired(), Length(max=50)])
