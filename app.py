@@ -37,7 +37,7 @@ def ask(module):
 
     if form.validate_on_submit():
         question = request.form.get('question')
-        print(question)
+        return redirect(url_for('searchResults', module=module.upper(), question=question))
 
     return render_template('ask.html', title="Index", form=form, module=module.upper())
 
@@ -53,7 +53,16 @@ def livesearch():
     
     return jsonify(hint)
 
-
+@app.route('/searchResults/<string:module>/<string:question>')
+def searchResults(module, question):
+    page = request.args.get('page', 1, type=int)
+    question = request.args.get('question', question)
+    module = request.args.get('module', module)
+    search = "%{}%".format(question)
+    results = Question.query.filter_by(modCode=module).filter(Question.question.like(search)).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
+    if results.items == []:
+        flash("There are no results currently.", "success")
+    return render_template('search_results.html', questions = results, search=question, module=module.upper())
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -112,7 +121,6 @@ def your_questions():
     page = request.args.get('page', 1, type=int)
     questions = Question.query.filter_by(authorId=current_user.get_id()).order_by(Question.datetime.desc()).paginate(page=page, per_page=5)
     return render_template('your_questions.html', name=current_user.username, questions = questions)
-
 
 @app.route('/question/<int:question_id>')
 def question(question_id):
