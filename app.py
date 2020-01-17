@@ -1,13 +1,10 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
-from flask_bootstrap import Bootstrap
-from flask_wtf import FlaskForm 
-from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from models import User, LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, AnswerForm, Question, Answer, app, db
+from models import User, Question, Answer, app, db
+from forms import LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, AnswerForm
 from modules import modulesDict
 from datetime import datetime
 from PIL import Image
