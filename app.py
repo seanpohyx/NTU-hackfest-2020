@@ -5,10 +5,13 @@ from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from models import User, LoginForm, RegisterForm, UpdateForm, SearchForm, PostQuestionForm, Question, Answer, app, db
 from modules import modulesDict
 from datetime import datetime
+from PIL import Image
+import os
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -133,6 +136,15 @@ def update_question(question_id):
     question = Question.query.get_or_404(question_id)
     return render_template('question.html', title=question.question, question = question)
 
+def save_picture(form_picture):
+    picture_fn = secure_filename(form_picture.filename)
+    picture_path = os.path.join(app.root_path + '\static\images', picture_fn)
+    output_size = (125,125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return picture_fn
 @app.route('/user/<string:username>')
 @login_required
 def user_questions(username):
@@ -148,26 +160,28 @@ def user_questions(username):
 @login_required
 def profile():
     form = UpdateForm()
+    image_file = url_for('static', filename='images/' + current_user.image_file)
 
     if form.validate_on_submit():
         if form.password.data == form.retypePassword.data:
             hashed_password = generate_password_hash(form.password.data, method='sha256')
             user = User.query.filter_by(id=current_user.id).first()
+            if request.method == 'POST' and form.image.data:
+                picture_file = save_picture(form.image.data)
+                user.image_file = picture_file
             user.password = hashed_password
             user.username = form.username.data
-            print(user.username)
-            print(form.username.data)
             user.email = form.email.data
             db.session.commit()
             flash('successful update')
             return redirect(url_for('dashboard'))
         else:
-            error('incorrect password')
+            flash('incorrect password')
 
     form.username.data = current_user.username
     form.email.data = current_user.email
 
-    return render_template('profile.html', name=current_user.username, form=form)
+    return render_template('profile.html', name=current_user.username, form=form, image_file=image_file)
 
 @app.route('/logout')
 @login_required
