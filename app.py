@@ -148,7 +148,7 @@ def update_question(question_id):
     if form.validate_on_submit():
         question.question = form.question_title.data
         question.description = form.question.data
-        question.modCode = form.module_code.data
+        question.modCode = request.form.get('modulesSelect').upper()
         db.session.commit()
         flash('Your question has been updated!', 'success')
         return redirect(url_for('question', question_id=question.id))
@@ -156,10 +156,9 @@ def update_question(question_id):
     elif request.method == 'GET':
         form.question_title.data = question.question
         form.question.data = question.description
-        form.module_code.data = question.modCode
 
-    return render_template('postQuestion.html', form=form, 
-                            title="Update Question", legend="Update Question")
+    return render_template('postQuestion.html', form=form, modules=modulesDict,
+                            title="Update Question", legend="Update Question", modCode=question.modCode)
 
 @app.route('/question/<int:question_id>/delete', methods=['POST'])
 @login_required
